@@ -216,3 +216,72 @@ Evaluation of your submission will be based on the following criteria.
    they explained?
 1. Did you separate any concerns in your application? Why or why not?
 1. Does your solution use appropriate data types for the problem as described?
+
+# How to build and run the web app (Ubuntu)
+
+1. Install Maven - This is a build automation tool used for Java projects
+   
+    ```
+    Sudo apt-get install maven
+    ```
+2. Install Postgresql - This is an open source database used to archive data for the application as requested 
+    ```
+    sudo apt-get install postgresql postgresql-contrib
+    ```
+3. Setup a password for Postgresql for the default user - This is a requirement before the application can use it
+     ```
+    sudo -u postgres psql
+    ```
+    ```
+    ALTER USER postgres with encrypted password 'bA%&Y66HkT';
+    ```
+    *Please enter the password specified here as that is what the application expects to be able to to connect to the database. No other password will work. 
+    
+4. Install Tomcat and start it - this is a web server the application will be deployed to
+    ```
+    sudo apt-get install tomcat8
+    ```
+     ```
+    systemctl start tomcat8
+    ```
+5. Install the Java Development Kit Package if not already present
+    ```
+    sudo apt-get install default-jdk
+    ```
+
+6. Go to the location where the git bundle was extracted and make sure you are in the root directory. Then enter the following build maven command in the terminal:
+
+    ```
+    mvn clean package
+    ```
+
+7. If the above command was successful, you should see a new "Target" folder in the directory. In there will be a file named payrollchallenge.war. This needs to be deployed to the web server. The easiest way is to move payrollchallenge.war to inside /var/lib/tomcat8/webapps. 
+
+8. Start up Tomcat and go to http://localhost:8080/payrollchallenge-1.0
+    This is a simple web page that allows you to test out the applications functionality easily. You can upload new valid .csv files from here as well as get the expected report. Note you can also just go to http://localhost:8080/payrollchallenge-1.0/GetReport? directly to retrieve it. 
+
+# Followup Questions
+
+Q. How did you test that your implementation was correct?
+ 
+I added multiple unit tests to test the different components seperately. As part of the output test data, I used the sample expected JSON output provided in this README. Then I confirmed my returned JSON was the exact same given the same input data. 
+
+Additionally, I did some manual testing for the entire process. This included adding several kinds of sample CSVs and ensuring the expected report could be retrieved. I did some manual calculations to ensure the report data was what it should have been. 
+
+Q. If this application was destined for a production environment, what would you add or change?
+
+In terms of scalability and performance which is very important in a production environment, this application could be improved. 
+
+When generating the report, currently it gets all the pay roll entry data it needs from the database and then generates the report from scratch each time. Assuming countless users were invoking the web server at once and there was a large amount of report data coming in, this would quickly become a performance issue. To remedy this ideally some kind of caching mechanism for the report should exist. A simple solution would be to keep the object used to generate reports in memory and update it dynamically as new report entry data came in which should scale a lot better. This way on a request for the report, the application would have to do far less work on consecutive requests. 
+
+Additionally, some kind of rate limiter for api requests could be implemented. Right now there is no restriction so users could request the report countless times if they wanted to in a short time span. To prevent api abuse and protect the application from bad potentially automated requests, it could restrict how many times per minute for instance, the same user can request or add data on a web server level. 
+
+Error handling could also be improved. Right now the application expects completely correct data to come into the system. It expects a valid csv file with data in a particular format. But there is no guarantee all users will comply to these expectations. At the very least in a production environment, the APIs should return well explained errors if any of the data comes in a format it cannot handle or ideally, it should try to handle input data in more formats for flexibility and ease of use. 
+
+In terms of features the application could be certainly expanded on as well. Right now it does not provide an api to modify or delete existing pay roll entries. Users might input incorrect data by mistake that later needs to be corrected. Additionally, the application returns a report for all time. But users might want only data returned for specific time periods, employees or job groups. Providing an api that takes in search parameters with these options would be ideal. Once it was better understood how users chose to typically use the application, database level indexes could be added as well for more efficient lookups. 
+
+Q.What compromises did you have to make as a result of the time constraints of this challenge?
+
+The performance and scalability concerns I mentioned in the previous section were some of the compromises I made due to time constraints.  
+
+Additionally, I added some unit tests for the core functionality of the various components. But I could have added more unit tests and/or expanded the existing ones with more input data so potentially more corner cases were tested. A full integration test would be nice. Ideally it would be something like a selenium web test that spins up a browser instance, goes to the sample web page I provided and makes the api calls from there. This way every component of the application would be tested together just like how it would be used in a production environment.

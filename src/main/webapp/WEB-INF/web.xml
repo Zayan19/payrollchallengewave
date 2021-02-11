@@ -1,0 +1,20 @@
+<web-app>
+    <servlet>
+        <servlet-name>OnStartup</servlet-name>
+        <servlet-class>se.challenge.web.OnStartup</servlet-class>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>WebApis</servlet-name>
+        <servlet-class>se.challenge.web.WebAPIs</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WebApis</servlet-name>
+        <url-pattern>/GetReport</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>WebApis</servlet-name>
+        <url-pattern>/AddPayrollEntries</url-pattern>
+    </servlet-mapping>
+</web-app>
